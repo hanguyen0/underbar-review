@@ -39,9 +39,9 @@
   // last element.
   _.last = function (array, n) {
     if (n === 0) {
-      return []
+      return [];
     }
-    return n === undefined ? array[array.length - 1] : array.slice(-n)
+    return n === undefined ? array[array.length - 1] : array.slice(-n);
   };
 
   // Call iterator(value, key, collection) for each element of collection.
@@ -50,6 +50,23 @@
   // Note: _.each does not have a return value, but rather simply runs the
   // iterator function over each item in the input collection.
   _.each = function (collection, iterator) {
+
+
+    if (Array.isArray(collection)) {
+      for (let i = 0; i < collection.length; i++) {
+        if (iterator) {
+          iterator(collection[i], i, collection)
+        }
+      }
+    }
+
+    else if (typeof collection === 'object' && typeof collection !== null) {
+      for (let key in collection) {
+        if (iterator) {
+          iterator(collection[key], key, collection)
+        }
+      }
+    }
   };
 
   // Returns the index at which value can be found in the array, or -1 if value
@@ -61,8 +78,10 @@
     var result = -1;
 
     _.each(array, function (item, index) {
+
       if (item === target && result === -1) {
         result = index;
+
       }
     });
 
@@ -71,14 +90,27 @@
 
   // Return all elements of an array that pass a truth test.
   _.filter = function (collection, test) {
+    let result = [];
+    for (let i = 0; i < collection.length; i++) {
+      if (test(collection[i])) {
+        result.push(collection[i])
+      }
+    }
+    return result;
   };
 
   // Return all elements of an array that don't pass a truth test.
   _.reject = function (collection, test) {
     // TIP: see if you can re-use _.filter() here, without simply
     // copying code in and modifying it
-  };
-
+    let result = [];
+    for (let item of collection) {
+      if (!test(item)) {
+        result.push(item);
+      }
+    };
+    return result;
+  }
   // Produce a duplicate-free version of the array.
   _.uniq = function (array, isSorted, iterator) {
   };
@@ -89,6 +121,14 @@
     // map() is a useful primitive iteration function that works a lot
     // like each(), but in addition to running the operation on all
     // the members, it also maintains an array of results.
+
+    let result = [];
+
+    for (let item of collection) {
+      result.push(iterator(item))
+    }
+
+    return result;
   };
 
   /*
@@ -130,19 +170,56 @@
   //   }); // should be 5, regardless of the iterator function passed in
   //          No accumulator is given so the first element is used.
   _.reduce = function (collection, iterator, accumulator) {
+    let deepCopy = [...collection];
+
+    //positive
+    for (let item of collection) { //[1,1,2][1,undefinded, 2]
+
+      if (accumulator) {
+        accumulator = iterator(accumulator, item) || accumulator;
+      } else {
+        if (accumulator === 0) {
+          accumulator = 0;
+        }
+        else if (accumulator == false) {
+          accumulator = false;
+        }
+        else {
+          accumulator = collection[0];
+        }
+      }
+    }
+
+    return accumulator;
   };
+
+  // function simpleAdd(x, y) {
+  //   return x + y;
+  // }
+
 
   // Determine if the array or object contains a given value (using `===`).
   _.contains = function (collection, target) {
     // TIP: Many iteration problems can be most easily expressed in
     // terms of reduce(). Here's a freebie to demonstrate!
-    return _.reduce(collection, function (wasFound, item) {
+    if (typeof collection === "object" && typeof collection !== null && !Array.isArray(collection)) {
+      collection = Object.values(collection);
+    }
+    let deepCopy = [...collection];
+
+    let wasFound = false;
+    for (let i = 0; i < deepCopy.length; i++) {
+      let item = deepCopy[i];
       if (wasFound) {
         return true;
       }
-      return item === target;
-    }, false);
+      if (item === target) {
+        wasFound = true;
+      };
+    }
+    return false;
   };
+
 
 
   // Determine whether all of the elements match a truth test.
